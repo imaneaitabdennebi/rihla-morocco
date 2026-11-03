@@ -13,6 +13,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/">Accueil</Link>
+      <Link to="/circuits">Circuits</Link>
 
       {!user && (
         <>
