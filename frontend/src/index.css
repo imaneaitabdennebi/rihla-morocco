@@ -14,3 +14,4 @@ button { background: #0a7d5a; color: white; border: none; cursor: pointer; }
 button:disabled { background: #aaa; cursor: not-allowed; }
 .navbar-user { color: white; margin-left: auto; }
 .logout-btn { background: white; color: #0a7d5a; font-weight: bold; padding: 6px 12px; }
+.error { color: red; font-size: 14px; margin: 0; }
