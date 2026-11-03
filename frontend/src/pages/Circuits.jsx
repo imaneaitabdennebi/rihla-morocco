@@ -3,13 +3,13 @@ import { circuits } from '../data/circuits';
 import { useAuth } from '../context/AuthContext';
 import { addBooking } from '../utils/bookings';
 
+const today = new Date().toISOString().split('T')[0];
+
 export default function Circuits() {
   const { user } = useAuth();
   const [selectedId, setSelectedId] = useState(null);
   const [date, setDate] = useState('');
   const [message, setMessage] = useState('');
-
-  const today = new Date().toISOString().split('T')[0];
 
   const handleBook = (circuit) => {
     if (!date) {
