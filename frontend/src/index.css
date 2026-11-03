@@ -15,3 +15,5 @@ button:disabled { background: #aaa; cursor: not-allowed; }
 .navbar-user { color: white; margin-left: auto; }
 .logout-btn { background: white; color: #0a7d5a; font-weight: bold; padding: 6px 12px; }
 .error { color: red; font-size: 14px; margin: 0; }
+.success { color: #0a7d5a; font-weight: bold; }
+.booking-box { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
