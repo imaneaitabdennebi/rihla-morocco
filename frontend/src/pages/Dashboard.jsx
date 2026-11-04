@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getBookings, cancelBooking } from '../utils/bookings';
+import { getBookings, cancelBooking, updateStatus } from '../utils/bookings';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState(getBookings());
 
+  const refresh = () => setBookings(getBookings());
+
   const myBookings = bookings.filter((b) => b.userEmail === user.email);
 
   const handleCancel = (id) => {
     cancelBooking(id);
-    setBookings(getBookings());
+    refresh();
+  };
+
+  const handleStatus = (id, status) => {
+    updateStatus(id, status);
+    refresh();
   };
 
   return (
@@ -42,7 +49,7 @@ export default function Dashboard() {
                     <td>{b.price} MAD</td>
                     <td>{b.status}</td>
                     <td>
-                      {b.status === 'en attente' && (
+                      {(b.status === 'en attente' || b.status === 'confirmée') && (
                         <button onClick={() => handleCancel(b.id)}>Annuler</button>
                       )}
                     </td>
@@ -56,13 +63,40 @@ export default function Dashboard() {
 
       {user.role === 'guide' && (
         <div>
-          <h2>Espace guide</h2>
-          <ul>
-            <li>Mon profil</li>
-            <li>Mes circuits</li>
-            <li>Réservations reçues</li>
-            <li>Mes statistiques</li>
-          </ul>
+          <h2>Réservations reçues</h2>
+          {bookings.length === 0 && <p>Aucune réservation reçue.</p>}
+
+          {bookings.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  <th>Circuit</th>
+                  <th>Touriste</th>
+                  <th>Date</th>
+                  <th>Statut</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map((b) => (
+                  <tr key={b.id}>
+                    <td>{b.circuitTitle}</td>
+                    <td>{b.userEmail}</td>
+                    <td>{b.date}</td>
+                    <td>{b.status}</td>
+                    <td>
+                      {b.status === 'en attente' && (
+                        <>
+                          <button onClick={() => handleStatus(b.id, 'confirmée')}>Accepter</button>{' '}
+                          <button onClick={() => handleStatus(b.id, 'refusée')}>Refuser</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 

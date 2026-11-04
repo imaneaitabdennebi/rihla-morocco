@@ -26,9 +26,13 @@ export function addBooking({ circuit, date, userEmail }) {
   saveBookings(list);
 }
 
-export function cancelBooking(id) {
+export function updateStatus(id, status) {
   const list = getBookings().map((b) =>
-    b.id === id ? { ...b, status: 'annulée' } : b
+    b.id === id ? { ...b, status } : b
   );
   saveBookings(list);
+}
+
+export function cancelBooking(id) {
+  updateStatus(id, 'annulée');
 }
