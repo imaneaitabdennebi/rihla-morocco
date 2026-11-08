@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { circuits } from '../data/circuits';
 import { useAuth } from '../context/AuthContext';
 import { addBooking } from '../utils/bookings';
+import { getCircuitStats } from '../utils/reviews';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -28,36 +29,42 @@ export default function Circuits() {
       {message && <p className="success">{message}</p>}
 
       <div className="grid">
-        {circuits.map((c) => (
-          <div className="card" key={c.id}>
-            <h3>{c.title}</h3>
-            <p>📍 {c.city}</p>
-            <p>⏱️ {c.duration}</p>
-            <p>💰 {c.price} MAD</p>
-            <p>{c.description}</p>
+        {circuits.map((c) => {
+          const stats = getCircuitStats(c.id);
+          return (
+            <div className="card" key={c.id}>
+              <h3>{c.title}</h3>
+              <p>📍 {c.city}</p>
+              <p>⏱️ {c.duration}</p>
+              <p>💰 {c.price} MAD</p>
+              <p>
+                ⭐ {stats.count > 0 ? `${stats.avg} / 5 (${stats.count} avis)` : "Pas encore d'avis"}
+              </p>
+              <p>{c.description}</p>
 
-            {user?.role === 'tourist' && selectedId !== c.id && (
-              <button onClick={() => { setSelectedId(c.id); setMessage(''); }}>
-                Réserver
-              </button>
-            )}
+              {user?.role === 'tourist' && selectedId !== c.id && (
+                <button onClick={() => { setSelectedId(c.id); setMessage(''); }}>
+                  Réserver
+                </button>
+              )}
 
-            {user?.role === 'tourist' && selectedId === c.id && (
-              <div className="booking-box">
-                <input
-                  type="date"
-                  min={today}
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-                <button onClick={() => handleBook(c)}>Confirmer</button>
-                <button onClick={() => setSelectedId(null)}>Annuler</button>
-              </div>
-            )}
+              {user?.role === 'tourist' && selectedId === c.id && (
+                <div className="booking-box">
+                  <input
+                    type="date"
+                    min={today}
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                  <button onClick={() => handleBook(c)}>Confirmer</button>
+                  <button onClick={() => setSelectedId(null)}>Annuler</button>
+                </div>
+              )}
 
-            {!user && <p><em>Connectez-vous pour réserver.</em></p>}
-          </div>
-        ))}
+              {!user && <p><em>Connectez-vous pour réserver.</em></p>}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

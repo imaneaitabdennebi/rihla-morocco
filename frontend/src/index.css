@@ -25,3 +25,5 @@ th { background: #0a7d5a; color: white; }
 .notif-list li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; gap: 12px; }
 .notif-list li.unread { border-left: 4px solid #0a7d5a; font-weight: bold; }
 .notif-list small { color: #777; white-space: nowrap; }
+.review-form { display: flex; flex-direction: column; gap: 10px; max-width: 420px; margin-top: 20px; background: white; padding: 16px; border-radius: 8px; }
+textarea { padding: 10px; font-size: 16px; font-family: inherit; }

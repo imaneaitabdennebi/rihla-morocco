@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getBookings, cancelBooking, updateStatus } from '../utils/bookings';
+import { addReview, hasReview } from '../utils/reviews';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState(getBookings());
+  const [reviewing, setReviewing] = useState(null);
+  const [rating, setRating] = useState('5');
+  const [comment, setComment] = useState('');
+  const [, setTick] = useState(0);
 
   const refresh = () => setBookings(getBookings());
 
@@ -18,6 +23,15 @@ export default function Dashboard() {
   const handleStatus = (id, status) => {
     updateStatus(id, status);
     refresh();
+  };
+
+  const handleReview = (e) => {
+    e.preventDefault();
+    addReview({ booking: reviewing, rating, comment });
+    setReviewing(null);
+    setRating('5');
+    setComment('');
+    setTick((t) => t + 1);
   };
 
   return (
@@ -51,12 +65,37 @@ export default function Dashboard() {
                     <td>
                       {(b.status === 'en attente' || b.status === 'confirmée') && (
                         <button onClick={() => handleCancel(b.id)}>Annuler</button>
+                      )}{' '}
+                      {b.status === 'confirmée' && !hasReview(b.id) && (
+                        <button onClick={() => setReviewing(b)}>Donner un avis</button>
                       )}
+                      {b.status === 'confirmée' && hasReview(b.id) && <span>✔ Avis envoyé</span>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          )}
+
+          {reviewing && (
+            <form onSubmit={handleReview} className="review-form">
+              <h3>Avis sur "{reviewing.circuitTitle}"</h3>
+              <select value={rating} onChange={(e) => setRating(e.target.value)}>
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Très bien</option>
+                <option value="3">3 - Bien</option>
+                <option value="2">2 - Moyen</option>
+                <option value="1">1 - Mauvais</option>
+              </select>
+              <textarea
+                rows="3"
+                placeholder="Votre commentaire"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <button type="submit">Envoyer l'avis</button>
+              <button type="button" onClick={() => setReviewing(null)}>Annuler</button>
+            </form>
           )}
         </div>
       )}
