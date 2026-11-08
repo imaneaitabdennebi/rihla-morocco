@@ -6,6 +6,7 @@ import Circuits from './pages/Circuits';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Notifications from './pages/Notifications';
 
 export default function App() {
   return (
@@ -24,6 +25,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/notifications"
+  element={
+    <ProtectedRoute>
+      <Notifications />
+    </ProtectedRoute>
+  }
+      />
       </Routes>
     </>
   );

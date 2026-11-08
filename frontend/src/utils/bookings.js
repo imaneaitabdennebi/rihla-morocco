@@ -1,3 +1,5 @@
+import { addNotification } from './notifications';
+
 const KEY = 'bookings';
 
 export function getBookings() {
@@ -24,15 +26,35 @@ export function addBooking({ circuit, date, userEmail }) {
     status: 'en attente',
   });
   saveBookings(list);
+
+  addNotification(
+    'role:guide',
+    `Nouvelle réservation de ${userEmail} pour "${circuit.title}" le ${date}.`
+  );
 }
 
 export function updateStatus(id, status) {
-  const list = getBookings().map((b) =>
-    b.id === id ? { ...b, status } : b
-  );
-  saveBookings(list);
+  const list = getBookings();
+  const booking = list.find((b) => b.id === id);
+  saveBookings(list.map((b) => (b.id === id ? { ...b, status } : b)));
+
+  if (booking) {
+    addNotification(
+      booking.userEmail,
+      `Votre réservation "${booking.circuitTitle}" du ${booking.date} est ${status}.`
+    );
+  }
 }
 
 export function cancelBooking(id) {
-  updateStatus(id, 'annulée');
+  const list = getBookings();
+  const booking = list.find((b) => b.id === id);
+  saveBookings(list.map((b) => (b.id === id ? { ...b, status: 'annulée' } : b)));
+
+  if (booking) {
+    addNotification(
+      'role:guide',
+      `${booking.userEmail} a annulé la réservation "${booking.circuitTitle}" du ${booking.date}.`
+    );
+  }
 }
