@@ -1,50 +1,54 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { getBookings, cancelBooking, updateStatus } from '../utils/bookings';
-import { addReview, hasReview } from '../utils/reviews';
+
+const STATUS = {
+  pending: 'en attente',
+  confirmed: 'confirmée',
+  refused: 'refusée',
+  cancelled: 'annulée',
+};
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [bookings, setBookings] = useState(getBookings());
-  const [reviewing, setReviewing] = useState(null);
-  const [rating, setRating] = useState('5');
-  const [comment, setComment] = useState('');
-  const [, setTick] = useState(0);
+  const [reservations, setReservations] = useState([]);
+  const [reload, setReload] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const refresh = () => setBookings(getBookings());
+  useEffect(() => {
+    api
+      .get('/reservations')
+      .then(({ data }) => setReservations(data.data))
+      .catch(() => setError('Impossible de charger les réservations.'))
+      .finally(() => setLoading(false));
+  }, [reload]);
 
-  const myBookings = bookings.filter((b) => b.userEmail === user.email);
-
-  const handleCancel = (id) => {
-    cancelBooking(id);
-    refresh();
+  const act = async (request) => {
+    setError('');
+    try {
+      await request();
+      setReload((r) => r + 1);
+    } catch (err) {
+      setError(err.response?.data?.message || "L'action a échoué.");
+    }
   };
 
-  const handleStatus = (id, status) => {
-    updateStatus(id, status);
-    refresh();
-  };
-
-  const handleReview = (e) => {
-    e.preventDefault();
-    addReview({ booking: reviewing, rating, comment });
-    setReviewing(null);
-    setRating('5');
-    setComment('');
-    setTick((t) => t + 1);
-  };
+  const cancel = (id) => act(() => api.patch(`/reservations/${id}/cancel`));
+  const setStatus = (id, status) => act(() => api.patch(`/reservations/${id}/status`, { status }));
 
   return (
     <div className="container">
       <h1>Tableau de bord</h1>
       <p>Bienvenue {user.name} !</p>
+      {error && <p className="error">{error}</p>}
+      {loading && <p>Chargement...</p>}
 
       {user.role === 'tourist' && (
         <div>
           <h2>Mes réservations</h2>
-          {myBookings.length === 0 && <p>Aucune réservation pour le moment.</p>}
-
-          {myBookings.length > 0 && (
+          {!loading && reservations.length === 0 && <p>Aucune réservation pour le moment.</p>}
+          {reservations.length > 0 && (
             <table>
               <thead>
                 <tr>
@@ -56,56 +60,30 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {myBookings.map((b) => (
-                  <tr key={b.id}>
-                    <td>{b.circuitTitle}</td>
-                    <td>{b.date}</td>
-                    <td>{b.price} MAD</td>
-                    <td>{b.status}</td>
+                {reservations.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.circuit?.title}</td>
+                    <td>{r.date.slice(0, 10)}</td>
+                    <td>{Number(r.circuit?.price)} MAD</td>
+                    <td>{STATUS[r.status]}</td>
                     <td>
-                      {(b.status === 'en attente' || b.status === 'confirmée') && (
-                        <button onClick={() => handleCancel(b.id)}>Annuler</button>
-                      )}{' '}
-                      {b.status === 'confirmée' && !hasReview(b.id) && (
-                        <button onClick={() => setReviewing(b)}>Donner un avis</button>
+                      {(r.status === 'pending' || r.status === 'confirmed') && (
+                        <button onClick={() => cancel(r.id)}>Annuler</button>
                       )}
-                      {b.status === 'confirmée' && hasReview(b.id) && <span>✔ Avis envoyé</span>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
-
-          {reviewing && (
-            <form onSubmit={handleReview} className="review-form">
-              <h3>Avis sur "{reviewing.circuitTitle}"</h3>
-              <select value={rating} onChange={(e) => setRating(e.target.value)}>
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Très bien</option>
-                <option value="3">3 - Bien</option>
-                <option value="2">2 - Moyen</option>
-                <option value="1">1 - Mauvais</option>
-              </select>
-              <textarea
-                rows="3"
-                placeholder="Votre commentaire"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
-              <button type="submit">Envoyer l'avis</button>
-              <button type="button" onClick={() => setReviewing(null)}>Annuler</button>
-            </form>
-          )}
         </div>
       )}
 
-      {user.role === 'guide' && (
+      {(user.role === 'guide' || user.role === 'admin') && (
         <div>
-          <h2>Réservations reçues</h2>
-          {bookings.length === 0 && <p>Aucune réservation reçue.</p>}
-
-          {bookings.length > 0 && (
+          <h2>{user.role === 'admin' ? 'Toutes les réservations' : 'Réservations reçues'}</h2>
+          {!loading && reservations.length === 0 && <p>Aucune réservation reçue.</p>}
+          {reservations.length > 0 && (
             <table>
               <thead>
                 <tr>
@@ -117,17 +95,17 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((b) => (
-                  <tr key={b.id}>
-                    <td>{b.circuitTitle}</td>
-                    <td>{b.userEmail}</td>
-                    <td>{b.date}</td>
-                    <td>{b.status}</td>
+                {reservations.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.circuit?.title}</td>
+                    <td>{r.user?.email}</td>
+                    <td>{r.date.slice(0, 10)}</td>
+                    <td>{STATUS[r.status]}</td>
                     <td>
-                      {b.status === 'en attente' && (
+                      {r.status === 'pending' && (
                         <>
-                          <button onClick={() => handleStatus(b.id, 'confirmée')}>Accepter</button>{' '}
-                          <button onClick={() => handleStatus(b.id, 'refusée')}>Refuser</button>
+                          <button onClick={() => setStatus(r.id, 'confirmed')}>Accepter</button>{' '}
+                          <button onClick={() => setStatus(r.id, 'refused')}>Refuser</button>
                         </>
                       )}
                     </td>
@@ -136,18 +114,6 @@ export default function Dashboard() {
               </tbody>
             </table>
           )}
-        </div>
-      )}
-
-      {user.role === 'admin' && (
-        <div>
-          <h2>Espace administrateur</h2>
-          <ul>
-            <li>Gérer les utilisateurs</li>
-            <li>Superviser les réservations</li>
-            <li>Statistiques globales</li>
-            <li>Exporter PDF / Excel</li>
-          </ul>
         </div>
       )}
     </div>
