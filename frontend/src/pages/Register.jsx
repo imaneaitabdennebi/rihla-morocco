@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -27,14 +28,34 @@ export default function Register() {
     return err;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const err = validate();
     setErrors(err);
     if (Object.keys(err).length > 0) return;
 
-    login({ name: form.name, email: form.email, role: form.role });
-    navigate('/dashboard');
+    try {
+      const { data } = await api.post('/register', {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        password_confirmation: form.confirm,
+        role: form.role,
+      });
+      login(data.user, data.token);
+      navigate('/dashboard');
+    } catch (error) {
+      const serverErrors = error.response?.data?.errors;
+      if (serverErrors) {
+        const mapped = {};
+        Object.entries(serverErrors).forEach(([field, messages]) => {
+          mapped[field] = messages[0];
+        });
+        setErrors(mapped);
+      } else {
+        setErrors({ general: 'Erreur de connexion au serveur.' });
+      }
+    }
   };
 
   return (
@@ -58,6 +79,7 @@ export default function Register() {
           <option value="guide">Guide</option>
         </select>
 
+        {errors.general && <p className="error">{errors.general}</p>}
         <button type="submit">S'inscrire</button>
       </form>
     </div>

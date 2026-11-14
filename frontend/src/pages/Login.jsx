@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -17,12 +18,13 @@ export default function Login() {
       return;
     }
 
-    let role = 'tourist';
-    if (email.includes('admin')) role = 'admin';
-    else if (email.includes('guide')) role = 'guide';
-
-    login({ name: email.split('@')[0], email, role });
-    navigate('/');
+    try {
+      const { data } = await api.post('/login', { email, password });
+      login(data.user, data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erreur de connexion au serveur.');
+    }
   };
 
   return (
@@ -41,7 +43,7 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="error">{error}</p>}
         <button type="submit">Se connecter</button>
       </form>
     </div>
