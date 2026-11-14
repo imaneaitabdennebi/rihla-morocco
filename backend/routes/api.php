@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CircuitController;
 use App\Http\Controllers\Api\GuideController;
+use App\Http\Controllers\Api\ReservationController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -17,4 +18,9 @@ Route::get('/circuits/{circuit}', [CircuitController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::post('/reservations', [ReservationController::class, 'store']);
+    Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
+    Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
 });

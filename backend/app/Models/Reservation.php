@@ -8,6 +8,13 @@ class Reservation extends Model
 {
     protected $fillable = ['user_id', 'circuit_id', 'date', 'status'];
 
+    protected function casts(): array
+    {
+        return [
+            'date' => 'date',
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
