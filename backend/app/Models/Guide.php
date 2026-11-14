@@ -17,4 +17,9 @@ class Guide extends Model
     {
         return $this->hasMany(Circuit::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasManyThrough(Review::class, Circuit::class);
+    }
 }

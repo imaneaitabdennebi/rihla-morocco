@@ -1,10 +1,18 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CircuitController;
+use App\Http\Controllers\Api\GuideController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/cities', [GuideController::class, 'cities']);
+Route::get('/guides', [GuideController::class, 'index']);
+Route::get('/guides/{guide}', [GuideController::class, 'show']);
+Route::get('/circuits', [CircuitController::class, 'index']);
+Route::get('/circuits/{circuit}', [CircuitController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
