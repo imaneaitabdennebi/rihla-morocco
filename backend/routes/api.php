@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CircuitController;
 use App\Http\Controllers\Api\GuideController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReservationController;
+use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -16,6 +17,7 @@ Route::get('/guides', [GuideController::class, 'index']);
 Route::get('/guides/{guide}', [GuideController::class, 'show']);
 Route::get('/circuits', [CircuitController::class, 'index']);
 Route::get('/circuits/{circuit}', [CircuitController::class, 'show']);
+Route::get('/circuits/{circuit}/reviews', [ReviewController::class, 'indexByCircuit']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
@@ -27,6 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
     Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
+
+    // Avis
+    Route::get('/reviews/mine', [ReviewController::class, 'mine']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);

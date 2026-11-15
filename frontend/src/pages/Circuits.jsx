@@ -19,6 +19,8 @@ export default function Circuits() {
   const [date, setDate] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [openReviewsId, setOpenReviewsId] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     api.get('/cities').then(({ data }) => setCities(data)).catch(() => {});
@@ -77,6 +79,20 @@ export default function Circuits() {
     }
   };
 
+  const toggleReviews = async (circuitId) => {
+    if (openReviewsId === circuitId) {
+      setOpenReviewsId(null);
+      return;
+    }
+    try {
+      const { data } = await api.get(`/circuits/${circuitId}/reviews`);
+      setReviews(data);
+      setOpenReviewsId(circuitId);
+    } catch {
+      setError('Impossible de charger les avis.');
+    }
+  };
+
   return (
     <div className="container">
       <h1>Nos circuits</h1>
@@ -119,6 +135,23 @@ export default function Circuits() {
                 : "Pas encore d'avis"}
             </p>
             <p>{c.description}</p>
+
+            {c.reviews_count > 0 && (
+              <button onClick={() => toggleReviews(c.id)}>
+                {openReviewsId === c.id ? 'Masquer les avis' : 'Voir les avis'}
+              </button>
+            )}
+
+            {openReviewsId === c.id && (
+              <div className="reviews">
+                {reviews.map((rv) => (
+                  <p key={rv.id}>
+                    <strong>{rv.user?.name}</strong> : {'⭐'.repeat(rv.rating)}
+                    {rv.comment && <><br />{rv.comment}</>}
+                  </p>
+                ))}
+              </div>
+            )}
 
             {user?.role === 'tourist' && selectedId !== c.id && (
               <button onClick={() => { setSelectedId(c.id); setMessage(''); setError(''); }}>

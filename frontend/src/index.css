@@ -42,3 +42,46 @@ textarea { padding: 10px; font-size: 16px; font-family: inherit; }
   form { max-width: 100%; }
 }
 .filters { flex-wrap: wrap; }
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 24px;
+  background: #0b7f5f;
+}
+.navbar a,
+.navbar button {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.navbar .logo {
+  font-size: 1.1rem;
+  margin-right: auto;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-links button {
+  background: transparent;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.nav-links a.active {
+  border-bottom: 2px solid #fff;
+}
+.badge {
+  display: inline-block;
+  margin-left: 4px;
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.75rem;
+  text-align: center;
+}
