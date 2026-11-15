@@ -1,45 +1,57 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { countUnread } from '../utils/notifications';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  useLocation(); // pour recalculer le compteur à chaque changement de page
+  const location = useLocation();
+  const [unread, setUnread] = useState(0);
 
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const load = () =>
+      api
+        .get('/notifications/unread-count')
+        .then(({ data }) => active && setUnread(data.count))
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 30000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [user, location.pathname]);
+
+  const handleLogout = async () => {
+    await logout();
+    setUnread(0);
     navigate('/login');
   };
 
-  const unread = user ? countUnread(user) : 0;
-
   return (
     <nav className="navbar">
-      <Link to="/">Accueil</Link>
-      <Link to="/circuits">Circuits</Link>
-
-      {!user && (
-        <>
-          <Link to="/login">Connexion</Link>
-          <Link to="/register">Inscription</Link>
-        </>
-      )}
-
-      {user && (
-        <>
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/notifications">
-            🔔 {unread > 0 && <span className="badge">{unread}</span>}
-          </Link>
-          <span className="navbar-user">
-            {user.name} ({user.role})
-          </span>
-          <button className="logout-btn" onClick={handleLogout}>
-            Déconnexion
-          </button>
-        </>
-      )}
+      <Link to="/" className="logo">🧭 Guides Maroc</Link>
+      <div className="nav-links">
+        <NavLink to="/">Accueil</NavLink>
+        <NavLink to="/circuits">Circuits</NavLink>
+        {user ? (
+          <>
+            <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/notifications">
+              🔔{unread > 0 && <span className="badge">{unread}</span>}
+            </NavLink>
+            <button onClick={handleLogout}>Déconnexion</button>
+          </>
+        ) : (
+          <>
+            <NavLink to="/login">Connexion</NavLink>
+            <NavLink to="/register">Inscription</NavLink>
+          </>
+        )}
+      </div>
     </nav>
   );
 }
