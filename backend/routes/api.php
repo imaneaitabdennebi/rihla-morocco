@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CircuitController;
 use App\Http\Controllers\Api\GuideController;
+use App\Http\Controllers\Api\GuideSpaceController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\ReviewController;
@@ -39,4 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+
+    // Espace guide
+    Route::get('/guide/profile', [GuideSpaceController::class, 'showProfile']);
+    Route::put('/guide/profile', [GuideSpaceController::class, 'updateProfile']);
+    Route::get('/guide/circuits', [GuideSpaceController::class, 'circuits']);
+    Route::post('/guide/circuits', [GuideSpaceController::class, 'storeCircuit']);
+    Route::put('/guide/circuits/{circuit}', [GuideSpaceController::class, 'updateCircuit']);
+    Route::delete('/guide/circuits/{circuit}', [GuideSpaceController::class, 'destroyCircuit']);
 });

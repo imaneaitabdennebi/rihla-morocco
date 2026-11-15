@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -8,13 +8,14 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Notifications from './pages/Notifications';
+import GuideSpace from './pages/GuideSpace';
 import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
-    <div className="page-wrapper">
+    <div className="app">
       <Navbar />
-      <main className="main-content">
+      <main>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/circuits" element={<Circuits />} />
@@ -25,6 +26,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/guide"
+            element={
+              <ProtectedRoute>
+                <GuideSpace />
               </ProtectedRoute>
             }
           />

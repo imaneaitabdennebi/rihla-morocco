@@ -40,6 +40,7 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>
+            {user.role === 'guide' && <NavLink to="/guide">Mon espace</NavLink>}
             <NavLink to="/notifications">
               🔔{unread > 0 && <span className="badge">{unread}</span>}
             </NavLink>
