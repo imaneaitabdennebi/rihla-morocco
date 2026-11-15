@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Notifications from './pages/Notifications';
 import GuideSpace from './pages/GuideSpace';
+import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -34,6 +35,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <GuideSpace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
               </ProtectedRoute>
             }
           />

@@ -103,3 +103,16 @@ textarea { padding: 10px; font-size: 16px; font-family: inherit; }
 .form-grid textarea {
   min-height: 80px;
 }
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.tabs button {
+  background: #e8efec;
+  color: #0b7f5f;
+}
+.tabs button.active {
+  background: #0b7f5f;
+  color: #fff;
+}

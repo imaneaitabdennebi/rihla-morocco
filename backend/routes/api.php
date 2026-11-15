@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CircuitController;
 use App\Http\Controllers\Api\GuideController;
@@ -48,4 +49,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/guide/circuits', [GuideSpaceController::class, 'storeCircuit']);
     Route::put('/guide/circuits/{circuit}', [GuideSpaceController::class, 'updateCircuit']);
     Route::delete('/guide/circuits/{circuit}', [GuideSpaceController::class, 'destroyCircuit']);
+
+    // Espace admin
+    Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::patch('/admin/users/{user}/toggle', [AdminController::class, 'toggleUser']);
+    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser']);
+    Route::get('/admin/reviews', [AdminController::class, 'reviews']);
+    Route::delete('/admin/reviews/{review}', [AdminController::class, 'destroyReview']);
 });
