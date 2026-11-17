@@ -116,3 +116,46 @@ textarea { padding: 10px; font-size: 16px; font-family: inherit; }
   background: #0b7f5f;
   color: #fff;
 }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+.stat-card .value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0b7f5f;
+}
+.stat-card .label {
+  color: #666;
+  font-size: 0.9rem;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+.bar-label {
+  width: 110px;
+}
+.bar-track {
+  flex: 1;
+  background: #e8efec;
+  border-radius: 6px;
+  height: 18px;
+}
+.bar-fill {
+  background: #0b7f5f;
+  height: 100%;
+  border-radius: 6px;
+  min-width: 2px;
+}

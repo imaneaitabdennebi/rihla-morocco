@@ -31,6 +31,9 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  const isGuide = user?.role === 'guide';
+  const isAdmin = user?.role === 'admin';
+
   return (
     <nav className="navbar">
       <Link to="/" className="logo">🧭 Guides Maroc</Link>
@@ -40,8 +43,9 @@ export default function Navbar() {
         {user ? (
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>
-            {user.role === 'guide' && <NavLink to="/guide">Mon espace</NavLink>}
-            {user.role === 'admin' && <NavLink to="/admin">Administration</NavLink>}
+            {isGuide && <NavLink to="/guide">Mon espace</NavLink>}
+            {isAdmin && <NavLink to="/admin">Administration</NavLink>}
+            {(isGuide || isAdmin) && <NavLink to="/stats">Statistiques</NavLink>}
             <NavLink to="/notifications">
               🔔{unread > 0 && <span className="badge">{unread}</span>}
             </NavLink>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\GuideSpaceController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\StatsController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -41,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+
+    // Statistiques (guide + admin)
+    Route::get('/stats', [StatsController::class, 'index']);
 
     // Espace guide
     Route::get('/guide/profile', [GuideSpaceController::class, 'showProfile']);

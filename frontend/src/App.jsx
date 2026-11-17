@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Notifications from './pages/Notifications';
 import GuideSpace from './pages/GuideSpace';
 import Admin from './pages/Admin';
+import Stats from './pages/Stats';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -43,6 +44,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <Stats />
               </ProtectedRoute>
             }
           />
