@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import ExportButtons from '../components/ExportButtons';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS = {
@@ -77,6 +78,9 @@ export default function Dashboard() {
     <div className="container">
       <h1>Tableau de bord</h1>
       <p>Bienvenue {user.name} !</p>
+      <ExportButtons
+        title={user.role === 'tourist' ? 'Mes réservations' : 'Réservations reçues'}
+      />
       {message && <p className="success">{message}</p>}
       {error && <p className="error">{error}</p>}
       {loading && <p>Chargement...</p>}

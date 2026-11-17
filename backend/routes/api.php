@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CircuitController;
+use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\GuideController;
 use App\Http\Controllers\Api\GuideSpaceController;
 use App\Http\Controllers\Api\NotificationController;
@@ -32,6 +33,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
     Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
+
+    // Export
+    Route::get('/export/reservations', [ExportController::class, 'reservations']);
 
     // Avis
     Route::get('/reviews/mine', [ReviewController::class, 'mine']);
