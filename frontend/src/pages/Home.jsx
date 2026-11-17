@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-
-const slug = (s) =>
-  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
-
-const FALLBACK = 'linear-gradient(135deg, #c4552d, #14654d)';
-const photo = (city) => ({ backgroundImage: `url(/images/${slug(city)}.jpg), ${FALLBACK}` });
+import { cityPhoto } from '../utils/photo';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -83,7 +78,7 @@ export default function Home() {
               key={c}
               to={`/circuits?city=${encodeURIComponent(c)}`}
               className="dest-tile"
-              style={photo(c)}
+              style={cityPhoto(c)}
             >
               <span>📍 {c}</span>
             </Link>
@@ -102,7 +97,7 @@ export default function Home() {
                 to={`/circuits?city=${encodeURIComponent(c.city)}`}
                 className="circuit-card"
               >
-                <div className="circuit-img" style={photo(c.city)}>
+                <div className="circuit-img" style={cityPhoto(c.city, c.id)}>
                   {c.reviews_avg_rating && (
                     <span className="rating-pill">★ {Number(c.reviews_avg_rating).toFixed(1)}</span>
                   )}

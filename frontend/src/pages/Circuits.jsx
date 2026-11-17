@@ -2,14 +2,9 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { cityPhoto } from '../utils/photo';
 
 const today = new Date().toISOString().split('T')[0];
-
-const slug = (s) =>
-  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
-const photo = (city) => ({
-  backgroundImage: `url(/images/${slug(city)}.jpg), linear-gradient(135deg, #c4552d, #14654d)`,
-});
 
 export default function Circuits() {
   const { user } = useAuth();
@@ -141,7 +136,7 @@ export default function Circuits() {
       <div className="grid">
         {circuits.map((c) => (
           <div className="circuit-card" key={c.id}>
-            <div className="circuit-img" style={photo(c.city)}>
+            <div className="circuit-img" style={cityPhoto(c.city, c.id)}>
               {c.reviews_avg_rating && (
                 <span className="rating-pill">★ {Number(c.reviews_avg_rating).toFixed(1)}</span>
               )}

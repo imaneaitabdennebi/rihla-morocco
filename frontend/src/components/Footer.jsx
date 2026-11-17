@@ -10,11 +10,16 @@ export default function Footer() {
         <div>
           <div className="footer-brand">RIHLA MOROCCO</div>
           <div className="footer-tagline">Voyagez · Explorez · Découvrez</div>
+          <p className="footer-text">
+            La plateforme qui vous met en relation avec des guides locaux passionnés pour
+            vivre le Maroc authentique.
+          </p>
         </div>
 
         <div>
           <h4>Explorer</h4>
           <Link to="/">Accueil</Link>
+          <Link to="/guides">Guides</Link>
           <Link to="/circuits">Circuits</Link>
         </div>
 
