@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CircuitController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\GuideController;
 use App\Http\Controllers\Api\GuideSpaceController;
+use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\ReviewController;
@@ -22,6 +23,7 @@ Route::get('/guides/{guide}', [GuideController::class, 'show']);
 Route::get('/circuits', [CircuitController::class, 'index']);
 Route::get('/circuits/{circuit}', [CircuitController::class, 'show']);
 Route::get('/circuits/{circuit}/reviews', [ReviewController::class, 'indexByCircuit']);
+Route::get('/reviews/latest', [HomeController::class, 'latestReviews']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {

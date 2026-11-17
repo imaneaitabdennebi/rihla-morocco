@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
+import Guides from './pages/Guides';
 import Circuits from './pages/Circuits';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,6 +21,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/guides" element={<Guides />} />
           <Route path="/circuits" element={<Circuits />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

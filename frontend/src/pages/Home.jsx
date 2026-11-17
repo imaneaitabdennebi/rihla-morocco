@@ -1,99 +1,155 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import GuideCard from '../components/GuideCard';
 
-const LANGUAGES = ['Arabe', 'Français', 'Anglais', 'Espagnol'];
+const slug = (s) =>
+  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+
+const FALLBACK = 'linear-gradient(135deg, #c4552d, #14654d)';
+const photo = (city) => ({ backgroundImage: `url(/images/${slug(city)}.jpg), ${FALLBACK}` });
 
 export default function Home() {
-  const [guides, setGuides] = useState([]);
+  const navigate = useNavigate();
   const [cities, setCities] = useState([]);
-  const [search, setSearch] = useState('');
+  const [featured, setFeatured] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [city, setCity] = useState('');
-  const [language, setLanguage] = useState('');
-  const [maxRate, setMaxRate] = useState('');
-  const [minRating, setMinRating] = useState('');
-  const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [budget, setBudget] = useState('');
 
   useEffect(() => {
     api.get('/cities').then(({ data }) => setCities(data)).catch(() => {});
+    api
+      .get('/circuits')
+      .then(({ data }) => {
+        const sorted = [...data.data].sort(
+          (a, b) => Number(b.reviews_avg_rating || 0) - Number(a.reviews_avg_rating || 0)
+        );
+        setFeatured(sorted.slice(0, 3));
+      })
+      .catch(() => {});
+    api.get('/reviews/latest').then(({ data }) => setReviews(data)).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      setLoading(true);
-      api
-        .get('/guides', {
-          params: { search, city, language, max_rate: maxRate, min_rating: minRating, page },
-        })
-        .then(({ data }) => {
-          if (cancelled) return;
-          setGuides(data.data);
-          setLastPage(data.last_page);
-          setError('');
-        })
-        .catch(() => {
-          if (!cancelled) setError('Impossible de charger les guides.');
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
-    }, 300);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [search, city, language, maxRate, minRating, page]);
-
-  const onFilter = (setter) => (e) => {
-    setter(e.target.value);
-    setPage(1);
+  const search = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (city) params.set('city', city);
+    if (budget) params.set('max_price', budget);
+    navigate(`/circuits?${params.toString()}`);
   };
 
   return (
-    <div className="container">
-      <h1>Nos guides</h1>
+    <div>
+      {/* Hero */}
+      <section
+        className="hero"
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(25,12,5,0.7), rgba(25,12,5,0.15)), url(/images/hero.avif), linear-gradient(135deg, #a4431f, #0c4535)`,
+        }}
+      >
+        <div className="hero-content">
+          <h1>Explorez le Maroc autrement</h1>
+          <p>
+            Découvrez des circuits uniques, rencontrez des guides passionnés et vivez une
+            expérience inoubliable.
+          </p>
+          <Link to="/circuits" className="btn">Découvrir les circuits →</Link>
+        </div>
+      </section>
 
-      <div className="filters">
-        <input placeholder="Rechercher un guide..." value={search} onChange={onFilter(setSearch)} />
-        <select value={city} onChange={onFilter(setCity)}>
-          <option value="">Toutes les villes</option>
-          {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+      {/* Barre de recherche */}
+      <form className="search-bar" onSubmit={search}>
+        <select value={city} onChange={(e) => setCity(e.target.value)}>
+          <option value="">Destination (toutes)</option>
+          {cities.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </select>
-        <select value={language} onChange={onFilter(setLanguage)}>
-          <option value="">Toutes les langues</option>
-          {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-        </select>
-        <select value={maxRate} onChange={onFilter(setMaxRate)}>
-          <option value="">Tous les tarifs</option>
+        <select value={budget} onChange={(e) => setBudget(e.target.value)}>
+          <option value="">Budget maximum</option>
           <option value="200">Jusqu'à 200 MAD</option>
           <option value="250">Jusqu'à 250 MAD</option>
           <option value="300">Jusqu'à 300 MAD</option>
         </select>
-        <select value={minRating} onChange={onFilter(setMinRating)}>
-          <option value="">Toutes les notes</option>
-          <option value="3">3 étoiles et +</option>
-          <option value="4">4 étoiles et +</option>
-        </select>
-      </div>
+        <button type="submit">Rechercher</button>
+      </form>
 
-      {error && <p className="error">{error}</p>}
-      {loading && <p>Chargement...</p>}
+      {/* Destinations populaires */}
+      <section className="home-section">
+        <h2 className="section-title">Destinations populaires</h2>
+        <div className="dest-grid">
+          {cities.map((c) => (
+            <Link
+              key={c}
+              to={`/circuits?city=${encodeURIComponent(c)}`}
+              className="dest-tile"
+              style={photo(c)}
+            >
+              <span>📍 {c}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-      <div className="grid">
-        {guides.map((g) => <GuideCard key={g.id} guide={g} />)}
-      </div>
-      {!loading && !error && guides.length === 0 && <p>Aucun guide trouvé.</p>}
+      {/* Circuits à la une */}
+      {featured.length > 0 && (
+        <section className="home-section">
+          <h2 className="section-title">Circuits à la une</h2>
+          <div className="feat-grid">
+            {featured.map((c) => (
+              <Link
+                key={c.id}
+                to={`/circuits?city=${encodeURIComponent(c.city)}`}
+                className="circuit-card"
+              >
+                <div className="circuit-img" style={photo(c.city)}>
+                  {c.reviews_avg_rating && (
+                    <span className="rating-pill">★ {Number(c.reviews_avg_rating).toFixed(1)}</span>
+                  )}
+                </div>
+                <div className="circuit-body">
+                  <h3>{c.title}</h3>
+                  <p className="meta">
+                    ⏱️ {c.duration} · 💰 à partir de {Number(c.price)} MAD
+                  </p>
+                  <div className="guide-line">
+                    <span className="avatar-sm">{c.guide?.user?.name?.charAt(0)}</span>
+                    <span>Par {c.guide?.user?.name}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <div className="pagination">
-        <button disabled={page === 1} onClick={() => setPage(page - 1)}>Précédent</button>
-        <span>Page {page} / {lastPage}</span>
-        <button disabled={page === lastPage} onClick={() => setPage(page + 1)}>Suivant</button>
-      </div>
+      {/* Avis des voyageurs */}
+      {reviews.length > 0 && (
+        <section className="home-section">
+          <h2 className="section-title">Avis des voyageurs</h2>
+          <div className="review-grid">
+            {reviews.map((r) => (
+              <div className="review-card" key={r.id}>
+                <div className="stars">
+                  {'★'.repeat(r.rating)}
+                  {'☆'.repeat(5 - r.rating)}
+                </div>
+                <p>« {r.comment} »</p>
+                <strong>{r.author}</strong>
+                <small>{r.circuit}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Bandeau */}
+      <section className="cta-band">
+        <div>
+          <h2>Découvrez le Maroc avec des guides locaux passionnés</h2>
+          <Link to="/circuits" className="btn">Explorer maintenant →</Link>
+        </div>
+      </section>
     </div>
   );
 }

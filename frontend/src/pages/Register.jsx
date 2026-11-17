@@ -1,87 +1,122 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
-    confirm: '',
+    password_confirmation: '',
     role: 'tourist',
   });
-  const [errors, setErrors] = useState({});
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const validate = () => {
-    const err = {};
-    if (form.name.trim().length < 3) err.name = 'Le nom doit contenir au moins 3 caractères.';
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) err.email = "L'email n'est pas valide.";
-    if (form.password.length < 6) err.password = 'Le mot de passe doit contenir au moins 6 caractères.';
-    if (form.password !== form.confirm) err.confirm = 'Les mots de passe ne sont pas identiques.';
-    return err;
-  };
+  const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const err = validate();
-    setErrors(err);
-    if (Object.keys(err).length > 0) return;
+    setError('');
 
+    if (form.name.trim().length < 3) {
+      setError('Le nom doit contenir au moins 3 caractères.');
+      return;
+    }
+    if (!form.email) {
+      setError("L'email est obligatoire.");
+      return;
+    }
+    if (form.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      return;
+    }
+    if (form.password !== form.password_confirmation) {
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const { data } = await api.post('/register', {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        password_confirmation: form.confirm,
-        role: form.role,
-      });
+      const { data } = await api.post('/register', form);
       login(data.user, data.token);
       navigate('/dashboard');
-    } catch (error) {
-      const serverErrors = error.response?.data?.errors;
-      if (serverErrors) {
-        const mapped = {};
-        Object.entries(serverErrors).forEach(([field, messages]) => {
-          mapped[field] = messages[0];
-        });
-        setErrors(mapped);
-      } else {
-        setErrors({ general: 'Erreur de connexion au serveur.' });
-      }
+    } catch (err) {
+      setError(
+        Object.values(err.response?.data?.errors || {})[0]?.[0] ||
+          err.response?.data?.message ||
+          "Inscription impossible. Réessayez."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <h1>Inscription</h1>
-      <form onSubmit={handleSubmit}>
-        <input name="name" placeholder="Nom" value={form.name} onChange={handleChange} />
-        {errors.name && <p className="error">{errors.name}</p>}
+    <div className="auth-page">
+      <div className="auth-image" />
+      <div className="auth-panel">
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <h1>Inscription</h1>
+          <p className="muted">Rejoignez Rihla Morocco en quelques secondes.</p>
 
-        <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} />
-        {errors.email && <p className="error">{errors.email}</p>}
+          {error && <p className="error">{error}</p>}
 
-        <input name="password" type="password" placeholder="Mot de passe" value={form.password} onChange={handleChange} />
-        {errors.password && <p className="error">{errors.password}</p>}
+          <label>
+            Nom complet
+            <input placeholder="Votre nom" value={form.name} onChange={set('name')} />
+          </label>
 
-        <input name="confirm" type="password" placeholder="Confirmer le mot de passe" value={form.confirm} onChange={handleChange} />
-        {errors.confirm && <p className="error">{errors.confirm}</p>}
+          <label>
+            Email
+            <input
+              type="email"
+              placeholder="votre@email.com"
+              value={form.email}
+              onChange={set('email')}
+            />
+          </label>
 
-        <select name="role" value={form.role} onChange={handleChange}>
-          <option value="tourist">Touriste</option>
-          <option value="guide">Guide</option>
-        </select>
+          <label>
+            Je suis
+            <select value={form.role} onChange={set('role')}>
+              <option value="tourist">Touriste</option>
+              <option value="guide">Guide</option>
+            </select>
+          </label>
 
-        {errors.general && <p className="error">{errors.general}</p>}
-        <button type="submit">S'inscrire</button>
-      </form>
+          <label>
+            Mot de passe
+            <input
+              type="password"
+              placeholder="6 caractères minimum"
+              value={form.password}
+              onChange={set('password')}
+            />
+          </label>
+
+          <label>
+            Confirmer le mot de passe
+            <input
+              type="password"
+              placeholder="Répétez le mot de passe"
+              value={form.password_confirmation}
+              onChange={set('password_confirmation')}
+            />
+          </label>
+
+          <button type="submit" disabled={loading}>
+            {loading ? 'Création...' : 'Créer mon compte'}
+          </button>
+
+          <p className="auth-switch">
+            Déjà inscrit ? <Link to="/login">Se connecter</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
