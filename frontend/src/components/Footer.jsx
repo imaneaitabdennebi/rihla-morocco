@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const year = new Date().getFullYear();
+
 export default function Footer() {
   const { user } = useAuth();
 
@@ -39,7 +41,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        © {new Date().getFullYear()} Rihla Morocco. Tous droits réservés.
+        © {year} Rihla Morocco. Tous droits réservés.
       </div>
     </footer>
   );
