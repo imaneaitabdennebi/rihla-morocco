@@ -15,6 +15,7 @@ export default function GuideSpace() {
   const [profile, setProfile] = useState(emptyProfile);
   const [hasProfile, setHasProfile] = useState(false);
   const [circuits, setCircuits] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [form, setForm] = useState(emptyCircuit);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +27,8 @@ export default function GuideSpace() {
 
   useEffect(() => {
     if (!isGuide) return;
-    Promise.all([api.get('/guide/profile'), api.get('/guide/circuits')])
-      .then(([p, c]) => {
+    Promise.all([api.get('/guide/profile'), api.get('/guide/circuits'), api.get('/guide/reviews')])
+      .then(([p, c, r]) => {
         if (p.data) {
           setProfile({
             city: p.data.city || '',
@@ -36,8 +37,12 @@ export default function GuideSpace() {
             bio: p.data.bio || '',
           });
           setHasProfile(true);
+        } else {
+          setProfile(emptyProfile);
+          setHasProfile(false);
         }
         setCircuits(c.data);
+        setReviews(r.data);
       })
       .catch(() => setError("Impossible de charger votre espace."))
       .finally(() => setLoading(false));
@@ -60,6 +65,21 @@ export default function GuideSpace() {
       await api.put('/guide/profile', { ...profile, rate: Number(profile.rate) });
       setHasProfile(true);
       setMessage('Profil enregistré.');
+    } catch (err) {
+      setError(errMsg(err));
+    }
+  };
+
+  const removeProfile = async () => {
+    if (!window.confirm('Supprimer définitivement votre profil et vos circuits ?')) return;
+    setMessage('');
+    setError('');
+    try {
+      await api.delete('/guide/profile');
+      setMessage('Profil supprimé.');
+      setForm(emptyCircuit);
+      setEditingId(null);
+      setReload((r) => r + 1);
     } catch (err) {
       setError(errMsg(err));
     }
@@ -129,14 +149,33 @@ export default function GuideSpace() {
 
       <h2>Mon profil</h2>
       {!hasProfile && !loading && (
-        <p><em>Complétez votre profil pour apparaître dans la liste des guides et ajouter des circuits.</em></p>
+        <p className="muted">
+          <em>Complétez votre profil pour apparaître dans la liste des guides et ajouter des circuits.</em>
+        </p>
       )}
       <form className="form-grid" onSubmit={saveProfile}>
         <input placeholder="Ville (ex: Marrakech)" value={profile.city} onChange={setP('city')} />
-        <input placeholder="Langues (ex: Arabe, Français)" value={profile.languages} onChange={setP('languages')} />
-        <input type="number" min="0" placeholder="Tarif par jour (MAD)" value={profile.rate} onChange={setP('rate')} />
+        <input
+          placeholder="Langues (ex: Arabe, Français)"
+          value={profile.languages}
+          onChange={setP('languages')}
+        />
+        <input
+          type="number"
+          min="0"
+          placeholder="Tarif par jour (MAD)"
+          value={profile.rate}
+          onChange={setP('rate')}
+        />
         <textarea placeholder="Présentation (bio)" value={profile.bio} onChange={setP('bio')} />
-        <button type="submit">Enregistrer le profil</button>
+        <div>
+          <button type="submit">Enregistrer le profil</button>{' '}
+          {hasProfile && (
+            <button type="button" className="btn-outline" onClick={removeProfile}>
+              Supprimer mon profil
+            </button>
+          )}
+        </div>
       </form>
 
       {hasProfile && (
@@ -146,11 +185,21 @@ export default function GuideSpace() {
             <input placeholder="Titre" value={form.title} onChange={setF('title')} />
             <input placeholder="Ville" value={form.city} onChange={setF('city')} />
             <input placeholder="Durée (ex: 3 heures)" value={form.duration} onChange={setF('duration')} />
-            <input type="number" min="0" placeholder="Prix (MAD)" value={form.price} onChange={setF('price')} />
+            <input
+              type="number"
+              min="0"
+              placeholder="Prix (MAD)"
+              value={form.price}
+              onChange={setF('price')}
+            />
             <textarea placeholder="Description" value={form.description} onChange={setF('description')} />
             <div>
               <button type="submit">{editingId ? 'Enregistrer' : 'Ajouter'}</button>{' '}
-              {editingId && <button type="button" onClick={cancelEdit}>Annuler</button>}
+              {editingId && (
+                <button type="button" className="btn-outline" onClick={cancelEdit}>
+                  Annuler
+                </button>
+              )}
             </div>
           </form>
 
@@ -182,6 +231,33 @@ export default function GuideSpace() {
                       <button onClick={() => startEdit(c)}>Modifier</button>{' '}
                       <button onClick={() => removeCircuit(c)}>Supprimer</button>
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          <h2>Avis reçus</h2>
+          {reviews.length === 0 && !loading && <p>Aucun avis pour le moment.</p>}
+          {reviews.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Touriste</th>
+                  <th>Circuit</th>
+                  <th>Note</th>
+                  <th>Commentaire</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviews.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.created_at.slice(0, 10)}</td>
+                    <td>{r.user?.name}</td>
+                    <td>{r.circuit?.title}</td>
+                    <td>{'⭐'.repeat(r.rating)}</td>
+                    <td>{r.comment || '-'}</td>
                   </tr>
                 ))}
               </tbody>

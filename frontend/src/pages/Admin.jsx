@@ -3,8 +3,12 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const ROLES = { tourist: 'Touriste', guide: 'Guide', admin: 'Admin' };
+const emptyCircuit = { title: '', description: '', price: '', duration: '', city: '' };
 
-const errMsg = (err) => err.response?.data?.message || "L'action a échoué.";
+const errMsg = (err) =>
+  Object.values(err.response?.data?.errors || {})[0]?.[0] ||
+  err.response?.data?.message ||
+  "L'action a échoué.";
 
 function Pagination({ page, lastPage, setPage }) {
   return (
@@ -76,9 +80,18 @@ function UsersTab({ currentUser }) {
         <input
           placeholder="Rechercher (nom ou email)..."
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
-        <select value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }}>
+        <select
+          value={role}
+          onChange={(e) => {
+            setRole(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="">Tous les rôles</option>
           <option value="tourist">Touristes</option>
           <option value="guide">Guides</option>
@@ -120,6 +133,156 @@ function UsersTab({ currentUser }) {
         </tbody>
       </table>
       {!loading && users.length === 0 && <p>Aucun utilisateur trouvé.</p>}
+      <Pagination page={page} lastPage={lastPage} setPage={setPage} />
+    </div>
+  );
+}
+
+function CircuitsTab() {
+  const [circuits, setCircuits] = useState([]);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [reload, setReload] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(emptyCircuit);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      setLoading(true);
+      api
+        .get('/admin/circuits', { params: { search, page } })
+        .then(({ data }) => {
+          if (cancelled) return;
+          setCircuits(data.data);
+          setLastPage(data.last_page);
+        })
+        .catch(() => !cancelled && setError('Impossible de charger les circuits.'))
+        .finally(() => !cancelled && setLoading(false));
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [search, page, reload]);
+
+  const setF = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  const startEdit = (c) => {
+    setEditingId(c.id);
+    setForm({
+      title: c.title,
+      description: c.description || '',
+      price: c.price,
+      duration: c.duration,
+      city: c.city,
+    });
+    setMessage('');
+    setError('');
+  };
+
+  const save = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
+    try {
+      await api.put(`/admin/circuits/${editingId}`, { ...form, price: Number(form.price) });
+      setMessage('Circuit modifié.');
+      setEditingId(null);
+      setForm(emptyCircuit);
+      setReload((r) => r + 1);
+    } catch (err) {
+      setError(errMsg(err));
+    }
+  };
+
+  const remove = async (c) => {
+    if (!window.confirm(`Supprimer "${c.title}" ?`)) return;
+    setMessage('');
+    setError('');
+    try {
+      await api.delete(`/admin/circuits/${c.id}`);
+      setMessage('Circuit supprimé.');
+      setReload((r) => r + 1);
+    } catch (err) {
+      setError(errMsg(err));
+    }
+  };
+
+  return (
+    <div>
+      <div className="filters">
+        <input
+          placeholder="Rechercher un circuit..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
+      </div>
+
+      {message && <p className="success">{message}</p>}
+      {error && <p className="error">{error}</p>}
+
+      {editingId && (
+        <form className="form-grid" onSubmit={save}>
+          <h3>Modifier le circuit</h3>
+          <input placeholder="Titre" value={form.title} onChange={setF('title')} />
+          <input placeholder="Ville" value={form.city} onChange={setF('city')} />
+          <input placeholder="Durée" value={form.duration} onChange={setF('duration')} />
+          <input type="number" min="0" placeholder="Prix (MAD)" value={form.price} onChange={setF('price')} />
+          <textarea placeholder="Description" value={form.description} onChange={setF('description')} />
+          <div>
+            <button type="submit">Enregistrer</button>{' '}
+            <button
+              type="button"
+              className="btn-outline"
+              onClick={() => {
+                setEditingId(null);
+                setForm(emptyCircuit);
+              }}
+            >
+              Annuler
+            </button>
+          </div>
+        </form>
+      )}
+
+      {loading && <p>Chargement...</p>}
+
+      <table>
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Guide</th>
+            <th>Ville</th>
+            <th>Prix</th>
+            <th>Réservations</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {circuits.map((c) => (
+            <tr key={c.id}>
+              <td>{c.title}</td>
+              <td>{c.guide?.user?.name}</td>
+              <td>{c.city}</td>
+              <td>{Number(c.price)} MAD</td>
+              <td>{c.reservations_count}</td>
+              <td>
+                <button onClick={() => startEdit(c)}>Modifier</button>{' '}
+                <button onClick={() => remove(c)}>Supprimer</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {!loading && circuits.length === 0 && <p>Aucun circuit trouvé.</p>}
       <Pagination page={page} lastPage={lastPage} setPage={setPage} />
     </div>
   );
@@ -217,11 +380,16 @@ export default function Admin() {
         <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>
           Utilisateurs
         </button>
+        <button className={tab === 'circuits' ? 'active' : ''} onClick={() => setTab('circuits')}>
+          Circuits
+        </button>
         <button className={tab === 'reviews' ? 'active' : ''} onClick={() => setTab('reviews')}>
           Avis
         </button>
       </div>
-      {tab === 'users' ? <UsersTab currentUser={user} /> : <ReviewsTab />}
+      {tab === 'users' && <UsersTab currentUser={user} />}
+      {tab === 'circuits' && <CircuitsTab />}
+      {tab === 'reviews' && <ReviewsTab />}
     </div>
   );
 }

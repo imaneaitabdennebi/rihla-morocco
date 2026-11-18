@@ -55,6 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Espace guide
     Route::get('/guide/profile', [GuideSpaceController::class, 'showProfile']);
     Route::put('/guide/profile', [GuideSpaceController::class, 'updateProfile']);
+    Route::delete('/guide/profile', [GuideSpaceController::class, 'destroyProfile']);
+    Route::get('/guide/reviews', [GuideSpaceController::class, 'reviews']);
     Route::get('/guide/circuits', [GuideSpaceController::class, 'circuits']);
     Route::post('/guide/circuits', [GuideSpaceController::class, 'storeCircuit']);
     Route::put('/guide/circuits/{circuit}', [GuideSpaceController::class, 'updateCircuit']);
@@ -64,6 +66,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users', [AdminController::class, 'users']);
     Route::patch('/admin/users/{user}/toggle', [AdminController::class, 'toggleUser']);
     Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser']);
+    Route::get('/admin/circuits', [AdminController::class, 'circuits']);
+    Route::put('/admin/circuits/{circuit}', [AdminController::class, 'updateCircuit']);
+    Route::delete('/admin/circuits/{circuit}', [AdminController::class, 'destroyCircuit']);
     Route::get('/admin/reviews', [AdminController::class, 'reviews']);
     Route::delete('/admin/reviews/{review}', [AdminController::class, 'destroyReview']);
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Circuit;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\QueryException;
@@ -15,6 +16,7 @@ class AdminController extends Controller
         abort_if($request->user()->role !== 'admin', 403, "Espace réservé à l'administrateur.");
     }
 
+    // ---------- Utilisateurs ----------
     public function users(Request $request)
     {
         $this->ensureAdmin($request);
@@ -71,6 +73,53 @@ class AdminController extends Controller
         return response()->json(['message' => 'Utilisateur supprimé.']);
     }
 
+    // ---------- Circuits ----------
+    public function circuits(Request $request)
+    {
+        $this->ensureAdmin($request);
+
+        return Circuit::with('guide.user:id,name')
+            ->withCount('reservations')
+            ->when($request->filled('search'), fn ($q) => $q->where('title', 'like', '%' . $request->search . '%'))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    public function updateCircuit(Request $request, Circuit $circuit)
+    {
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'title' => 'required|string|max:150',
+            'description' => 'required|string|max:2000',
+            'price' => 'required|numeric|min:0|max:99999',
+            'duration' => 'required|string|max:50',
+            'city' => 'required|string|max:100',
+        ]);
+
+        $circuit->update($data);
+
+        return response()->json($circuit);
+    }
+
+    public function destroyCircuit(Request $request, Circuit $circuit)
+    {
+        $this->ensureAdmin($request);
+
+        if ($circuit->reservations()->exists()) {
+            return response()->json(
+                ['message' => 'Impossible de supprimer : ce circuit a déjà des réservations.'],
+                422
+            );
+        }
+
+        $circuit->delete();
+
+        return response()->json(['message' => 'Circuit supprimé.']);
+    }
+
+    // ---------- Avis ----------
     public function reviews(Request $request)
     {
         $this->ensureAdmin($request);

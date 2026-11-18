@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Circuit;
 use App\Models\Guide;
+use App\Models\Reservation;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 class GuideSpaceController extends Controller
@@ -41,6 +43,29 @@ class GuideSpaceController extends Controller
         return response()->json($guide);
     }
 
+    public function destroyProfile(Request $request)
+    {
+        $guide = $this->guideOf($request);
+
+        if (! $guide) {
+            return response()->json(['message' => 'Aucun profil à supprimer.'], 404);
+        }
+
+        $circuitIds = $guide->circuits()->pluck('id');
+
+        if (Reservation::whereIn('circuit_id', $circuitIds)->exists()) {
+            return response()->json(
+                ['message' => "Impossible de supprimer le profil : des réservations existent. Contactez l'administrateur."],
+                422
+            );
+        }
+
+        $guide->circuits()->delete();
+        $guide->delete();
+
+        return response()->json(['message' => 'Profil supprimé.']);
+    }
+
     public function circuits(Request $request)
     {
         $guide = $this->guideOf($request);
@@ -52,6 +77,21 @@ class GuideSpaceController extends Controller
         return $guide->circuits()
             ->withCount('reservations')
             ->withAvg('reviews', 'rating')
+            ->latest()
+            ->get();
+    }
+
+    // Avis reçus sur les circuits du guide
+    public function reviews(Request $request)
+    {
+        $guide = $this->guideOf($request);
+
+        if (! $guide) {
+            return response()->json([]);
+        }
+
+        return Review::whereIn('circuit_id', $guide->circuits()->pluck('id'))
+            ->with(['user:id,name', 'circuit:id,title'])
             ->latest()
             ->get();
     }
