@@ -109,6 +109,7 @@ export default function Navbar() {
                   <small>{ROLE_LABEL[user.role]}</small>
                 </div>
                 <Link to="/dashboard" onClick={close}>Tableau de bord</Link>
+                <Link to="/account" onClick={close}>Mon compte</Link>
                 {isGuide && <Link to="/guide" onClick={close}>Mon espace guide</Link>}
                 {isAdmin && <Link to="/admin" onClick={close}>Administration</Link>}
                 {(isGuide || isAdmin) && <Link to="/stats" onClick={close}>Statistiques</Link>}

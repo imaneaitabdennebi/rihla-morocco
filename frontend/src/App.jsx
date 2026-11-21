@@ -8,6 +8,7 @@ import Circuits from './pages/Circuits';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Account from './pages/Account';
 import Notifications from './pages/Notifications';
 import GuideSpace from './pages/GuideSpace';
 import Admin from './pages/Admin';
@@ -30,6 +31,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <Account />
               </ProtectedRoute>
             }
           />

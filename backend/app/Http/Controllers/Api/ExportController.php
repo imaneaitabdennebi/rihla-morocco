@@ -8,19 +8,19 @@ use Illuminate\Http\Request;
 
 class ExportController extends Controller
 {
-    // Toutes les réservations visibles par l'utilisateur (sans pagination)
+    // Réservations visibles par l'utilisateur (sans pagination), pour l'export PDF/Excel
     public function reservations(Request $request)
     {
         $user = $request->user();
+
+        abort_if($user->role === 'tourist', 403, "Export réservé aux guides et à l'administrateur.");
 
         $query = Reservation::with([
             'user:id,name,email',
             'circuit:id,title,city,price,guide_id',
         ])->latest('date');
 
-        if ($user->role === 'tourist') {
-            $query->where('user_id', $user->id);
-        } elseif ($user->role === 'guide') {
+        if ($user->role === 'guide') {
             $guideId = $user->guide?->id;
             $query->whereHas('circuit', fn ($q) => $q->where('guide_id', $guideId));
         }

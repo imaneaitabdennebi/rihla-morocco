@@ -822,3 +822,9 @@ a {
     font-size: 1.5rem;
   }
 }
+.form-grid label {
+  display: grid;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+}

@@ -23,6 +23,8 @@ export default function Dashboard() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
 
+  const canExport = user.role === 'guide' || user.role === 'admin';
+
   useEffect(() => {
     const requests = [api.get('/reservations')];
     if (user.role === 'tourist') requests.push(api.get('/reviews/mine'));
@@ -78,9 +80,13 @@ export default function Dashboard() {
     <div className="container">
       <h1>Tableau de bord</h1>
       <p>Bienvenue {user.name} !</p>
-      <ExportButtons
-        title={user.role === 'tourist' ? 'Mes réservations' : 'Réservations reçues'}
-      />
+
+      {canExport && (
+        <ExportButtons
+          title={user.role === 'admin' ? 'Toutes les réservations' : 'Réservations reçues'}
+        />
+      )}
+
       {message && <p className="success">{message}</p>}
       {error && <p className="error">{error}</p>}
       {loading && <p>Chargement...</p>}

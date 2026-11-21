@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CircuitController;
@@ -29,6 +30,7 @@ Route::get('/reviews/latest', [HomeController::class, 'latestReviews']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/account', [AccountController::class, 'update']);
 
     // Réservations
     Route::get('/reservations', [ReservationController::class, 'index']);
@@ -36,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
     Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
 
-    // Export
+    // Export (guide + admin)
     Route::get('/export/reservations', [ExportController::class, 'reservations']);
 
     // Avis
