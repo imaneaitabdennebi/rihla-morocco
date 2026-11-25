@@ -828,3 +828,21 @@ a {
   font-weight: 500;
   font-size: 0.95rem;
 }
+/* ===== Tableau de bord ===== */
+.dash-link { display: inline-block; padding: 10px 18px; border: 1.5px solid #c4552d; background: #c4552d; color: #fff; border-radius: 999px; font-weight: 600; font-size: 0.95rem; text-decoration: none; }
+.dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+.dash-stat { background: #fff; border: 1px solid #eadfce; border-radius: 16px; padding: 20px; }
+.dash-stat strong { display: block; font-family: 'Playfair Display', serif; font-size: 2.2rem; line-height: 1; color: #14654d; margin-bottom: 6px; font-variant-numeric: lining-nums; font-feature-settings: 'lnum'; }
+.dash-stat span { color: #5b6b63; font-size: 0.95rem; }
+.dash-next { background: #14654d; color: #fff; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+.dash-next h3 { margin: 4px 0 6px; color: #fff; }
+.dash-next p { margin: 0; color: #d9ebe3; }
+.dash-next .dash-next-label { font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; color: #f0b08c; }
+.dash-empty { background: #fff; border: 1px dashed #d9c9b2; border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 24px; }
+.dash-empty p { margin: 0 0 16px; }
+.status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+.status-pending { background: #fdf1d6; color: #8a5a00; }
+.status-confirmed { background: #d9f0e4; color: #0c4535; }
+.status-refused { background: #fbe0da; color: #9b2c1a; }
+.status-cancelled { background: #e8e8e8; color: #555; }
+@media (max-width: 700px) { .dash-stats { grid-template-columns: 1fr 1fr; } }

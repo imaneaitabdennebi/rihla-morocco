@@ -1,0 +1,42 @@
+2026-11-03 | Etape 2 : structure frontend et routing
+2026-11-03 | Suppression App.css inutile
+2026-11-03 | Etape 3 : liste des guides, recherche, filtre, pagination
+2026-11-03 | Etape 4 : authentification, navbar dynamique, dashboard, route protegee
+2026-11-03 | Etape 5 : inscription avec validation
+2026-11-03 | Etape 6 : page circuits
+2026-11-03 | Etape 7 : reservation d'un circuit
+2026-11-03 | Etape 8 : mes reservations et annulation
+2026-11-03 | Ajout README, correction lint
+2026-11-04 | Etape 9 : traitement des reservations par le guide
+2026-11-08 | Etape 10 : notifications
+2026-11-08 | Etape 11 : avis et notes
+2026-11-08 | Etape 12 : page 404, footer, responsive
+2026-11-10 | Etape 13 : installation de Laravel (backend)
+2026-11-10 | Etape 14 : docker-compose (Laravel, MySQL, phpMyAdmin)
+2026-11-10 | Etape 15 : Laravel connecte a MySQL
+2026-11-10 | Etape 16 : table users (role) et guides
+2026-11-10 | Etape 17 : table circuits
+2026-11-10 | Etape 18 : table reservations
+2026-11-10 | Etape 19 : tables reviews et notifications
+2026-11-10 | Etape 20 : models Eloquent et relations
+2026-11-10 | Etape 21 : model User (role, relations)
+2026-11-14 | Etape 22 : API auth (Sanctum) : register, login, logout, me
+2026-11-14 | Etape 23 : login et register relies a l'API
+2026-11-14 | Etape 24 : seeder (admin, guides, circuits)
+2026-11-14 | Etape 25 : API guides et circuits (recherche, filtres, pagination)
+2026-11-14 | Etape 26 : page Accueil connectee a l'API (guides)
+2026-11-14 | Etape 27 : API reservations (touriste, guide) avec notifications
+2026-11-14 | Etape 28 : Circuits et Dashboard relies a l'API (reservations)
+2026-11-15 | Etape 29 : Notifications reliees a l'API
+2026-11-15 | Etape 30 : Avis (reviews) + Docker plus rapide (vendor volume)
+2026-11-15 | Etape 31 : Espace guide (profil + CRUD circuits)
+2026-11-15 | Etape 32 : Espace admin (utilisateurs + moderation des avis)
+2026-11-17 | Etape 33 : Statistiques (guide et admin)
+2026-11-17 | Etape 33 : Statistiques + Etape 34 : Export PDF et Excel
+2026-11-17 | Etape 35a : Design system, navbar et footer Rihla Morocco
+2026-11-18 | Etape 35d : Pages connexion et inscription (nouveau design)
+2026-11-18 | Etape 35e : Photos variees par circuit
+2026-11-18 | Etape 36a : Completion BF4/BF5 (suppression profil, admin circuits, avis du guide)
+2026-11-18 | Etape 36b : Docker complet (backend, frontend, db), .env.example, README
+2026-11-21 | Page Mon compte (modification du profil pour tous les roles) + export reserve aux guides/admin
+2026-11-24 | Create README.md

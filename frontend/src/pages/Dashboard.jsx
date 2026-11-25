@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import ExportButtons from '../components/ExportButtons';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +10,13 @@ const STATUS = {
   refused: 'refusée',
   cancelled: 'annulée',
 };
+
+// Calculé une seule fois (évite l'appel impur dans le composant)
+const TODAY = new Date().toISOString().slice(0, 10);
+
+function StatusPill({ status }) {
+  return <span className={`status-pill status-${status}`}>{STATUS[status]}</span>;
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -76,6 +84,12 @@ export default function Dashboard() {
     }
   };
 
+  // --- Données calculées ---
+  const countBy = (...statuses) => reservations.filter((r) => statuses.includes(r.status)).length;
+  const nextTrip = reservations
+    .filter((r) => r.status === 'confirmed' && r.date.slice(0, 10) >= TODAY)
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
   return (
     <div className="container">
       <h1>Tableau de bord</h1>
@@ -91,11 +105,32 @@ export default function Dashboard() {
       {error && <p className="error">{error}</p>}
       {loading && <p>Chargement...</p>}
 
-      {user.role === 'tourist' && (
+      {user.role === 'tourist' && !loading && (
         <div>
+          <div className="dash-stats">
+            <div className="dash-stat"><strong>{reservations.length}</strong><span>Réservations</span></div>
+            <div className="dash-stat"><strong>{countBy('pending')}</strong><span>En attente</span></div>
+            <div className="dash-stat"><strong>{countBy('confirmed')}</strong><span>Confirmées</span></div>
+            <div className="dash-stat"><strong>{countBy('refused', 'cancelled')}</strong><span>Refusées / annulées</span></div>
+          </div>
+
+          {nextTrip && (
+            <div className="dash-next">
+              <p className="dash-next-label">Mon prochain voyage</p>
+              <h3>{nextTrip.circuit?.title}</h3>
+              <p>
+                {nextTrip.date.slice(0, 10)} · {Number(nextTrip.circuit?.price)} MAD
+              </p>
+            </div>
+          )}
+
           <h2>Mes réservations</h2>
-          {!loading && reservations.length === 0 && <p>Aucune réservation pour le moment.</p>}
-          {reservations.length > 0 && (
+          {reservations.length === 0 ? (
+            <div className="dash-empty">
+              <p>Vous n&apos;avez pas encore de réservation.</p>
+              <Link to="/circuits" className="dash-link">Découvrir les circuits</Link>
+            </div>
+          ) : (
             <table>
               <thead>
                 <tr>
@@ -112,7 +147,7 @@ export default function Dashboard() {
                     <td>{r.circuit?.title}</td>
                     <td>{r.date.slice(0, 10)}</td>
                     <td>{Number(r.circuit?.price)} MAD</td>
-                    <td>{STATUS[r.status]}</td>
+                    <td><StatusPill status={r.status} /></td>
                     <td>
                       {(r.status === 'pending' || r.status === 'confirmed') && (
                         <button onClick={() => cancel(r.id)}>Annuler</button>
@@ -169,7 +204,7 @@ export default function Dashboard() {
                     <td>{r.circuit?.title}</td>
                     <td>{r.user?.email}</td>
                     <td>{r.date.slice(0, 10)}</td>
-                    <td>{STATUS[r.status]}</td>
+                    <td><StatusPill status={r.status} /></td>
                     <td>
                       {r.status === 'pending' && (
                         <>

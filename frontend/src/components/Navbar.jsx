@@ -34,8 +34,11 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 
+  // Les notifications concernent uniquement le touriste et le guide (BF13)
+  const canNotify = !!user && user.role !== 'admin';
+
   useEffect(() => {
-    if (!user) return;
+    if (!canNotify) return;
     let active = true;
     const load = () =>
       api
@@ -48,7 +51,7 @@ export default function Navbar() {
       active = false;
       clearInterval(timer);
     };
-  }, [user, location.pathname]);
+  }, [canNotify, location.pathname]);
 
   const close = () => {
     setMenuOpen(false);
@@ -95,9 +98,11 @@ export default function Navbar() {
 
         {user && (
           <div className="nav-user">
-            <Link to="/notifications" className="bell" aria-label="Notifications" onClick={close}>
-              🔔{unread > 0 && <span className="badge">{unread}</span>}
-            </Link>
+            {canNotify && (
+              <Link to="/notifications" className="bell" aria-label="Notifications" onClick={close}>
+                🔔{unread > 0 && <span className="badge">{unread}</span>}
+              </Link>
+            )}
             <button className="avatar" aria-label="Mon compte" onClick={() => setUserOpen((o) => !o)}>
               {user.name.charAt(0).toUpperCase()}
             </button>
@@ -113,7 +118,7 @@ export default function Navbar() {
                 {isGuide && <Link to="/guide" onClick={close}>Mon espace guide</Link>}
                 {isAdmin && <Link to="/admin" onClick={close}>Administration</Link>}
                 {(isGuide || isAdmin) && <Link to="/stats" onClick={close}>Statistiques</Link>}
-                <Link to="/notifications" onClick={close}>Notifications</Link>
+                {canNotify && <Link to="/notifications" onClick={close}>Notifications</Link>}
                 <button onClick={handleLogout}>Déconnexion</button>
               </div>
             )}
